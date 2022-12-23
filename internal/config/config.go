@@ -23,6 +23,7 @@ type ListConfig struct {
 type Config struct {
 	Debug                    TypeBool        `json:"debug"`
 	AllowFallbackOnUnknownDC TypeBool        `json:"allowFallbackOnUnknownDc"`
+	SubdomainSecret          string          `json:"subdomainSecret"`
 	Secret                   mtglib.Secret   `json:"secret"`
 	BindTo                   TypeHostPort    `json:"bindTo"`
 	PreferIP                 TypePreferIP    `json:"preferIp"`

@@ -12,6 +12,11 @@ type ProxyOpts struct {
 	// This is a mandatory setting.
 	Secret Secret
 
+	// Subdomain Secret is being used to verify the subdomain is valid.
+	//
+	// This is a mandatory setting.
+	SubdomainSecret string
+
 	// Network defines a network instance which should be used for all network
 	// communications made by proxies.
 	//

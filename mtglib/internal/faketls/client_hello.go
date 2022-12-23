@@ -21,14 +21,14 @@ type ClientHello struct {
 	CipherSuite uint16
 }
 
-func (c ClientHello) Valid(secret, hostname string, tolerateTimeSkewness time.Duration) error {
+func (c ClientHello) Valid(subdomainSecret, hostname string, tolerateTimeSkewness time.Duration) error {
 	if c.Host != "" && c.Host != hostname {
-		if !strings.HasSuffix(c.Host, hostname) {
+		if !strings.HasSuffix(c.Host, hostname) || subdomainSecret == "" {
 			return fmt.Errorf("incorrect hostname %s", hostname)
 		}
 
 		subdomain := strings.ReplaceAll(c.Host, "."+hostname, "")
-		if len(subdomain) != 12 {
+		if len(subdomain)%2 != 0 {
 			return fmt.Errorf("incorrect hostname len %s", subdomain)
 		}
 
@@ -37,12 +37,12 @@ func (c ClientHello) Valid(secret, hostname string, tolerateTimeSkewness time.Du
 			return fmt.Errorf("subdomain is not hex format %s", subdomain)
 		}
 
-		dec, err := XORBytes(bs[:3], []byte(secret[:3]))
+		dec, err := XORBytes(bs[:len(subdomain)/4], []byte(subdomainSecret[:len(subdomain)/4]))
 		if err != nil {
 			return fmt.Errorf("xor failed %s", hostname)
 		}
 
-		if string(dec) != string(bs[3:]) {
+		if string(dec) != string(bs[len(subdomain)/4:]) {
 			return fmt.Errorf("incorrect dec hostname %s", hostname)
 		}
 	}

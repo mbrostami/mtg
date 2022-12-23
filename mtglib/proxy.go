@@ -30,6 +30,7 @@ type Proxy struct {
 	workerPool               *ants.PoolWithFunc
 	telegram                 *telegram.Telegram
 
+	subdomainSecret string
 	secret          Secret
 	network         Network
 	antiReplayCache AntiReplayCache
@@ -171,7 +172,7 @@ func (p *Proxy) doFakeTLSHandshake(ctx *streamContext) bool {
 		return false
 	}
 
-	if err := hello.Valid(string(p.secret.Key[:]), p.secret.Host, p.tolerateTimeSkewness); err != nil {
+	if err := hello.Valid(p.subdomainSecret, p.secret.Host, p.tolerateTimeSkewness); err != nil {
 		p.logger.
 			BindStr("hostname", hello.Host).
 			BindStr("hello-time", hello.Time.String()).
@@ -303,6 +304,7 @@ func NewProxy(opts ProxyOpts) (*Proxy, error) {
 		ctx:                      ctx,
 		ctxCancel:                cancel,
 		secret:                   opts.Secret,
+		subdomainSecret:          opts.SubdomainSecret,
 		network:                  opts.Network,
 		antiReplayCache:          opts.AntiReplayCache,
 		blocklist:                opts.IPBlocklist,

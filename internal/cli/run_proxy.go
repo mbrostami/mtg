@@ -249,6 +249,7 @@ func runProxy(conf *config.Config, version string) error { //nolint: funlen
 		EventStream:     eventStream,
 
 		Secret:             conf.Secret,
+		SubdomainSecret:    conf.SubdomainSecret,
 		DomainFrontingPort: conf.DomainFrontingPort.Get(mtglib.DefaultDomainFrontingPort),
 		PreferIP:           conf.PreferIP.Get(mtglib.DefaultPreferIP),
 
