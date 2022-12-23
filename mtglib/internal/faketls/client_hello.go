@@ -43,7 +43,7 @@ func (c ClientHello) Valid(subdomainSecret, hostname string, tolerateTimeSkewnes
 		}
 
 		if string(dec) != string(bs[len(subdomain)/4:]) {
-			return fmt.Errorf("incorrect dec hostname %s", hostname)
+			return fmt.Errorf("incorrect hostname %s", hostname)
 		}
 	}
 

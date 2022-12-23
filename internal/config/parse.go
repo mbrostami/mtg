@@ -11,6 +11,7 @@ import (
 type tomlConfig struct {
 	Debug                    bool   `toml:"debug" json:"debug,omitempty"`
 	AllowFallbackOnUnknownDC bool   `toml:"allow-fallback-on-unknown-dc" json:"allowFallbackOnUnknownDc,omitempty"`
+	SubdomainSecret          string `toml:"subdomain-secret" json:"subdomainSecret"`
 	Secret                   string `toml:"secret" json:"secret"`
 	BindTo                   string `toml:"bind-to" json:"bindTo"`
 	PreferIP                 string `toml:"prefer-ip" json:"preferIp,omitempty"`

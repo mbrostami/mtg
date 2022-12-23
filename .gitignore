@@ -12,3 +12,5 @@ ccbuilds/
 coverage.txt
 dist/
 .idea
+.vscode
+config.toml
