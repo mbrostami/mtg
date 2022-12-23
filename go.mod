@@ -41,6 +41,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/gotd/ige v0.1.5 // indirect
 	github.com/gotd/xor v0.1.1 // indirect
+	github.com/kr/text v0.2.0 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.1 // indirect
@@ -49,7 +50,7 @@ require (
 	github.com/prometheus/client_model v0.2.0 // indirect
 	github.com/txthinking/runnergroup v0.0.0-20220212043759-8da8edb7dae8 // indirect
 	github.com/txthinking/x v0.0.0-20210326105829-476fab902fbe // indirect
-	go.uber.org/atomic v1.7.0 // indirect
+	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
 	go.uber.org/zap v1.16.0 // indirect
 	golang.org/x/sync v0.0.0-20220601150217-0de741cfad7f // indirect

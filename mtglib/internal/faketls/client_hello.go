@@ -5,7 +5,9 @@ import (
 	"crypto/sha256"
 	"crypto/subtle"
 	"encoding/binary"
+	"encoding/hex"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/9seconds/mtg/v2/mtglib/internal/faketls/record"
@@ -19,9 +21,30 @@ type ClientHello struct {
 	CipherSuite uint16
 }
 
-func (c ClientHello) Valid(hostname string, tolerateTimeSkewness time.Duration) error {
+func (c ClientHello) Valid(secret, hostname string, tolerateTimeSkewness time.Duration) error {
 	if c.Host != "" && c.Host != hostname {
-		return fmt.Errorf("incorrect hostname %s", hostname)
+		if !strings.HasSuffix(c.Host, hostname) {
+			return fmt.Errorf("incorrect hostname %s", hostname)
+		}
+
+		subdomain := strings.ReplaceAll(c.Host, "."+hostname, "")
+		if len(subdomain) != 12 {
+			return fmt.Errorf("incorrect hostname len %s", subdomain)
+		}
+
+		bs, err := hex.DecodeString(subdomain)
+		if err != nil {
+			return fmt.Errorf("subdomain is not hex format %s", subdomain)
+		}
+
+		dec, err := XORBytes(bs[:3], []byte(secret[:3]))
+		if err != nil {
+			return fmt.Errorf("xor failed %s", hostname)
+		}
+
+		if string(dec) != string(bs[3:]) {
+			return fmt.Errorf("incorrect dec hostname %s", hostname)
+		}
 	}
 
 	now := time.Now()
@@ -131,4 +154,18 @@ func parseSNI(hello *ClientHello, handshake []byte) {
 
 		return
 	}
+}
+
+func XORBytes(a, b []byte) ([]byte, error) {
+	if len(a) != len(b) {
+		return nil, fmt.Errorf("length of byte slices is not equivalent: %d != %d", len(a), len(b))
+	}
+
+	buf := make([]byte, len(a))
+
+	for i := range a {
+		buf[i] = a[i] ^ b[i]
+	}
+
+	return buf, nil
 }

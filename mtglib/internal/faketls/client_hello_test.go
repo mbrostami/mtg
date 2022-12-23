@@ -3,6 +3,7 @@ package faketls_test
 import (
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -157,11 +158,26 @@ func (suite *ClientHelloTestSuite) TestValidateHostname() {
 	hello := faketls.ClientHello{
 		Time: time.Now(),
 	}
-	suite.NoError(hello.Valid("hostname", time.Second))
+	suite.NoError(hello.Valid("xxxx", "hostname", time.Second))
 
 	hello.Host = "hostname"
-	suite.Error(hello.Valid("hostname2", time.Second))
-	suite.NoError(hello.Valid("hostname", time.Second))
+	suite.Error(hello.Valid("xxxx", "hostname2", time.Second))
+	suite.NoError(hello.Valid("xxxx", "hostname", time.Second))
+
+	hello.Host = "xxxyyy.hostname"
+	suite.Error(hello.Valid("xxxyyy", "hostname", time.Second))
+
+	sub := []byte("xxx")
+	sec := []byte("yyy")
+	enc, err := faketls.XORBytes(sub, sec)
+	suite.NoError(err)
+	hello.Host = fmt.Sprintf("%x%x.hostname", enc, sub)
+	suite.NoError(hello.Valid(string(sec), "hostname", time.Second))
+
+	enc, err = faketls.XORBytes(sub, sec)
+	suite.NoError(err)
+	hello.Host = fmt.Sprintf("%x%x.hostname", enc, "xxx")
+	suite.NoError(hello.Valid(string(sec), "hostname", time.Second))
 }
 
 func (suite *ClientHelloTestSuite) TestValidateTime() {
@@ -178,9 +194,9 @@ func (suite *ClientHelloTestSuite) TestValidateTime() {
 				Host: "hostname",
 				Time: time.Now().Add(value),
 			}
-			suite.Error(hello.Valid("hostname", 500*time.Millisecond))
-			suite.Error(hello.Valid("hostname", time.Second))
-			suite.NoError(hello.Valid("hostname", 3*time.Second))
+			suite.Error(hello.Valid("xxxx", "hostname", 500*time.Millisecond))
+			suite.Error(hello.Valid("xxxx", "hostname", time.Second))
+			suite.NoError(hello.Valid("xxxx", "hostname", 3*time.Second))
 		})
 	}
 }

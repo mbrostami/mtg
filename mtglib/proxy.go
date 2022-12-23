@@ -118,11 +118,11 @@ func (p *Proxy) Serve(listener net.Listener) error {
 		}
 
 		if p.blocklist.Contains(ipAddr) {
-			conn.Close()
+			// conn.Close()
 			logger.Info("ip was blacklisted")
-			p.eventStream.Send(p.ctx, NewEventIPBlocklisted(ipAddr))
+			// p.eventStream.Send(p.ctx, NewEventIPBlocklisted(ipAddr))
 
-			continue
+			// continue
 		}
 
 		err = p.workerPool.Invoke(conn)
@@ -155,6 +155,7 @@ func (p *Proxy) doFakeTLSHandshake(ctx *streamContext) bool {
 
 	rewind := newConnRewind(ctx.clientConn)
 
+	// TODO check if it's http request
 	if err := rec.Read(rewind); err != nil {
 		p.logger.InfoError("cannot read client hello", err)
 		p.doDomainFronting(ctx, rewind)
@@ -170,7 +171,7 @@ func (p *Proxy) doFakeTLSHandshake(ctx *streamContext) bool {
 		return false
 	}
 
-	if err := hello.Valid(p.secret.Host, p.tolerateTimeSkewness); err != nil {
+	if err := hello.Valid(string(p.secret.Key[:]), p.secret.Host, p.tolerateTimeSkewness); err != nil {
 		p.logger.
 			BindStr("hostname", hello.Host).
 			BindStr("hello-time", hello.Time.String()).
