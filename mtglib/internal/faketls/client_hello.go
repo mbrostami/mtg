@@ -2,6 +2,7 @@ package faketls
 
 import (
 	"crypto/hmac"
+	"crypto/md5"
 	"crypto/sha256"
 	"crypto/subtle"
 	"encoding/binary"
@@ -28,21 +29,14 @@ func (c ClientHello) Valid(subdomainSecret, hostname string, tolerateTimeSkewnes
 		}
 
 		subdomain := strings.ReplaceAll(c.Host, "."+hostname, "")
-		if len(subdomain)%2 != 0 {
+		if len(subdomain)%3 != 0 { // original + original * 2
 			return fmt.Errorf("incorrect hostname len %s", subdomain)
 		}
 
-		bs, err := hex.DecodeString(subdomain)
-		if err != nil {
-			return fmt.Errorf("subdomain is not hex format %s", subdomain)
-		}
+		remoteHash := subdomain[len(subdomain)/3:]
+		localHash := hashSubdomain(subdomainSecret, subdomain[:len(subdomain)/3])
 
-		dec, err := XORBytes(bs[:len(subdomain)/4], []byte(subdomainSecret[:len(subdomain)/4]))
-		if err != nil {
-			return fmt.Errorf("xor failed %s", hostname)
-		}
-
-		if string(dec) != string(bs[len(subdomain)/4:]) {
+		if remoteHash != localHash {
 			return fmt.Errorf("incorrect hostname %s", hostname)
 		}
 	}
@@ -60,6 +54,11 @@ func (c ClientHello) Valid(subdomainSecret, hostname string, tolerateTimeSkewnes
 	}
 
 	return nil
+}
+
+func hashSubdomain(subdomainSecret, subdomain string) string {
+	b := md5.Sum([]byte(subdomain[:3] + subdomainSecret))
+	return fmt.Sprintf("%s%s", subdomain[:3], hex.EncodeToString(b[:3]))
 }
 
 func ParseClientHello(secret, handshake []byte) (ClientHello, error) {
