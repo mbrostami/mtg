@@ -20,7 +20,7 @@ debug = true
 # should either be base64-encoded or starts with ee.
 secret = "ee367a189aee18fa31c190054efd4a8e9573746f726167652e676f6f676c65617069732e636f6d"
 
-# A secret to decrypt the incoming subdomains
+# A secret to verify the incoming subdomains
 # this will allow you to generate subdomains with the same secret and use it for 
 # generating new secrets, without impacting the performance 
 # len of the secret is important and it must be more than len of the generated subdomains

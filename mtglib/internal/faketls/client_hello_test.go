@@ -167,17 +167,15 @@ func (suite *ClientHelloTestSuite) TestValidateHostname() {
 	hello.Host = "xxxyyy.hostname"
 	suite.Error(hello.Valid("xxxyyy", "hostname", time.Second))
 
-	sub := []byte("xxx")
-	sec := []byte("yyy")
-	enc, err := faketls.XORBytes(sub, sec)
-	suite.NoError(err)
-	hello.Host = fmt.Sprintf("%x%x.hostname", enc, sub)
+	sub := "xxx"
+	sec := "yyy"
+	enc := faketls.HashSubdomain(sec, sub)
+	hello.Host = fmt.Sprintf("%s.hostname", enc)
 	suite.NoError(hello.Valid(string(sec), "hostname", time.Second))
 
-	enc, err = faketls.XORBytes(sub, sec)
-	suite.NoError(err)
-	hello.Host = fmt.Sprintf("%x%x.hostname", enc, "xxx")
-	suite.NoError(hello.Valid(string(sec), "hostname", time.Second))
+	enc = faketls.HashSubdomain(sec, sub)
+	hello.Host = fmt.Sprintf("%s.hostname", enc)
+	suite.NoError(hello.Valid(sec, "hostname", time.Second))
 }
 
 func (suite *ClientHelloTestSuite) TestValidateTime() {

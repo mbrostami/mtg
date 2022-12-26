@@ -33,10 +33,9 @@ func (c ClientHello) Valid(subdomainSecret, hostname string, tolerateTimeSkewnes
 			return fmt.Errorf("incorrect hostname len %s", subdomain)
 		}
 
-		remoteHash := subdomain[len(subdomain)/3:]
-		localHash := hashSubdomain(subdomainSecret, subdomain[:len(subdomain)/3])
+		localHash := HashSubdomain(subdomainSecret, subdomain[:len(subdomain)/3])
 
-		if remoteHash != localHash {
+		if subdomain != localHash {
 			return fmt.Errorf("incorrect hostname %s", hostname)
 		}
 	}
@@ -56,9 +55,9 @@ func (c ClientHello) Valid(subdomainSecret, hostname string, tolerateTimeSkewnes
 	return nil
 }
 
-func hashSubdomain(subdomainSecret, subdomain string) string {
-	b := md5.Sum([]byte(subdomain[:3] + subdomainSecret))
-	return fmt.Sprintf("%s%s", subdomain[:3], hex.EncodeToString(b[:3]))
+func HashSubdomain(subdomainSecret, subdomain string) string {
+	b := md5.Sum([]byte(subdomain + subdomainSecret))
+	return fmt.Sprintf("%s%s", subdomain, hex.EncodeToString(b[:len(subdomain)]))
 }
 
 func ParseClientHello(secret, handshake []byte) (ClientHello, error) {
@@ -153,18 +152,4 @@ func parseSNI(hello *ClientHello, handshake []byte) {
 
 		return
 	}
-}
-
-func XORBytes(a, b []byte) ([]byte, error) {
-	if len(a) != len(b) {
-		return nil, fmt.Errorf("length of byte slices is not equivalent: %d != %d", len(a), len(b))
-	}
-
-	buf := make([]byte, len(a))
-
-	for i := range a {
-		buf[i] = a[i] ^ b[i]
-	}
-
-	return buf, nil
 }
